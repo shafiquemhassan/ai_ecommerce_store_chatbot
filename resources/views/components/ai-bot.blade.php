@@ -11,18 +11,24 @@
         let userQuery = this.input;
         this.input = '';
         
-        // Mock AI Response
-        setTimeout(() => {
-            let response = 'I see you are asking about ' + userQuery + '. This is a great product feature!';
-            if (userQuery.toLowerCase().includes('warranty')) {
-                response = 'All our products come with a 1-year standard warranty.';
-            } else if (userQuery.toLowerCase().includes('price')) {
-                response = 'The price depends on the product. Please check the product page.';
-            }
-            
-            this.messages.push({text: response, sender: 'bot'});
-            this.speak(response);
-        }, 1000);
+        // Call Backend API
+        fetch('{{ route('bot.chat') }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').getAttribute('content')
+            },
+            body: JSON.stringify({ message: userQuery })
+        })
+        .then(response => response.json())
+        .then(data => {
+            this.messages.push({text: data.response, sender: 'bot'});
+            this.speak(data.response);
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            this.messages.push({text: 'Sorry, I am having trouble connecting to the server.', sender: 'bot'});
+        });
     },
     
     speak(text) {
