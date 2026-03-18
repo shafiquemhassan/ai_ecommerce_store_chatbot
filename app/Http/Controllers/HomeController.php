@@ -9,8 +9,8 @@ class HomeController extends Controller
 {
     public function index()
     {
-        // Mock recommendation: Get random products
-        $products = Product::query()->inRandomOrder()->take(8)->get();
+        // Get 16 products per page (4 rows of 4 items)
+        $products = Product::query()->paginate(16);
         return view('home', compact('products'));
     }
 }
